@@ -1,0 +1,15 @@
+scikit-learn
+pandas
+numpy
+lightgbm
+matplotlib
+seaborn
+sentence-transformers
+spacy
+requests
+anthropic
+streamlit
+python-dotenv
+elasticsearch
+faker
+joblib
