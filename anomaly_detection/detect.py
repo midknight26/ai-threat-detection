@@ -14,13 +14,44 @@ FAKE_IPS = [f"192.168.1.{i}" for i in range(1, 50)] + \
            [f"10.0.0.{i}"    for i in range(1, 20)] + \
            ["45.33.32.156", "185.220.101.45", "198.51.100.23"]
 
+def get_severity(anomaly_score, attack_type, flow_stats):
+    # DDoS = high traffic → more severe
+    if attack_type == "DDoS":
+        if flow_stats["packets_per_sec"] > 10000:
+            return "CRITICAL"
+        return "HIGH"
+
+    # PortScan = usually less severe
+    elif attack_type == "PortScan":
+        if flow_stats["fwd_packets"] < 10:
+            return "MEDIUM"
+        return "LOW"
+
+    # BruteForce = depends on duration
+    elif attack_type == "BruteForce":
+        if flow_stats["duration_ms"] > 500:
+            return "HIGH"
+        return "MEDIUM"
+
+    # fallback using anomaly score
+    if anomaly_score < -0.15:
+        return "CRITICAL"
+    elif anomaly_score < -0.10:
+        return "HIGH"
+    elif anomaly_score < -0.05:
+        return "MEDIUM"
+    else:
+        return "LOW"
+
 def generate_alert(row, anomaly_score, attack_type, confidence):
-    severity = (
-        "CRITICAL" if confidence > 0.90 else
-        "HIGH"     if confidence > 0.75 else
-        "MEDIUM"   if confidence > 0.55 else
-        "LOW"
-    )
+    flow_stats = {
+    	"duration_ms":      row["Flow Duration"],
+    	"fwd_packets":      row["Total Fwd Packets"],
+    	"bytes_per_sec":    round(row["Flow Bytes/s"], 2),
+    	"packets_per_sec":  round(row["Flow Packets/s"], 2),
+    	"syn_count":        row["SYN Flag Count"],
+    }
+    severity = get_severity(anomaly_score, attack_type, flow_stats)
     return {
         "alert_id":      str(uuid.uuid4()),
         "timestamp":     (datetime.utcnow() - timedelta(seconds=random.randint(0, 3600))).isoformat(),
@@ -30,13 +61,7 @@ def generate_alert(row, anomaly_score, attack_type, confidence):
         "anomaly_score": round(float(anomaly_score), 4),
         "confidence":    round(float(confidence),    4),
         "severity":      severity,
-        "flow_stats": {
-            "duration_ms":      row["Flow Duration"],
-            "fwd_packets":      row["Total Fwd Packets"],
-            "bytes_per_sec":    round(row["Flow Bytes/s"], 2),
-            "packets_per_sec":  round(row["Flow Packets/s"], 2),
-            "syn_count":        row["SYN Flag Count"],
-        }
+        "flow_stats": 	 flow_stats
     }
 
 def run_detection(csv_path="data/cicids_sample.csv", output_path="data/sample_alerts.json"):
