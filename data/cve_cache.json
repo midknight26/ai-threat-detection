@@ -1150,5 +1150,61 @@
     "published": "2026-03-16T14:19:43.400",
     "keyword": "credential stuffing",
     "attack_type_hint": "BruteForce"
+  },
+  {
+    "cve_id": "CVE-2022-45860",
+    "description": "A weak authentication vulnerability [CWE-1390] in FortiNAC-F version 7.2.0, FortiNAC version 9.4.2 and below, 9.2 all versions, 9.1 all versions, 8.8 all versions, 8.7 all versions in device registration page may allow an unauthenticated attacker to perform password spraying attacks with an increased chance of success.",
+    "base_score": 5.3,
+    "published": "2023-05-03T22:15:15.670",
+    "keyword": "password spray",
+    "attack_type_hint": "BruteForce"
+  },
+  {
+    "cve_id": "CVE-2023-41885",
+    "description": "Piccolo is an ORM and query builder which supports asyncio. In versions 0.120.0 and prior, the implementation of `BaseUser.login` leaks enough information to a malicious user such that they would be able to successfully generate a list of valid users on the platform. As Piccolo on its own does not also enforce strong passwords, these lists of valid accounts are likely to be used in a password spray attack with the outcome being attempted takeover of user accounts on the platform. The impact of this vulnerability is minor as it requires chaining with other attack vectors in order to gain more then simply a list of valid users on the underlying platform. The likelihood of this vulnerability is possible as it requires minimal skills to pull off, especially given the underlying login functionality for Piccolo based sites is open source. This issue has been patched in version 0.121.0.",
+    "base_score": 5.3,
+    "published": "2023-09-12T21:15:08.163",
+    "keyword": "password spray",
+    "attack_type_hint": "BruteForce"
+  },
+  {
+    "cve_id": "CVE-2024-37893",
+    "description": "Firefly III is a free and open source personal finance manager. In affected versions an MFA bypass in the Firefly III OAuth flow may allow malicious users to bypass the MFA-check. This allows malicious users to use password spraying to gain access to Firefly III data using passwords stolen from other sources. As OAuth applications are easily enumerable using an incrementing id, an attacker could try sign an OAuth application up to a users profile quite easily if they have created one. The attacker would also need to know the victims username and password. This problem has been patched in Firefly III v6.1.17 and up. Users are advised to upgrade. Users unable to upgrade should Use a unique password for their Firefly III instance and store their password securely, i.e. in a password manager.",
+    "base_score": 5.9,
+    "published": "2024-06-17T20:15:13.700",
+    "keyword": "password spray",
+    "attack_type_hint": "BruteForce"
+  },
+  {
+    "cve_id": "CVE-2025-22390",
+    "description": "An issue was discovered in Optimizely EPiServer.CMS.Core before 12.32.0. A medium-severity vulnerability exists in the CMS due to insufficient enforcement of password complexity requirements. The application permits users to set passwords with a minimum length of 6 characters, lacking adequate complexity to resist modern attack techniques such as password spraying or offline password cracking.",
+    "base_score": 7.5,
+    "published": "2025-01-04T02:15:07.747",
+    "keyword": "password spray",
+    "attack_type_hint": "BruteForce"
+  },
+  {
+    "cve_id": "CVE-2024-54852",
+    "description": "When LDAP connection is activated in Teedy versions between 1.9 to 1.12, the username field of the login form is vulnerable to LDAP injection. Due to improper sanitization of user input, an unauthenticated attacker is then able to perform various malicious actions, such as creating arbitrary accounts and spraying passwords.",
+    "base_score": 9.8,
+    "published": "2025-01-29T22:15:29.723",
+    "keyword": "password spray",
+    "attack_type_hint": "BruteForce"
+  },
+  {
+    "cve_id": "CVE-2025-56132",
+    "description": "LiquidFiles filetransfer server is vulnerable to a user enumeration issue in its password reset functionality. The application returns distinguishable responses for valid and invalid email addresses, allowing unauthenticated attackers to determine the existence of user accounts. Version 4.2 introduces user-based lockout mechanisms to mitigate brute-force attacks, user enumeration remains possible by default. In versions prior to 4.2, no such user-level protection is in place, only basic IP-based rate limiting is enforced. This IP-based protection can be bypassed by distributing requests across multiple IPs (e.g., rotating IP or proxies). Effectively bypassing both login and password reset security controls. Successful exploitation allows an attacker to enumerate valid email addresses registered for the application, increasing the risk of follow-up attacks such as password spraying.",
+    "base_score": 7.3,
+    "published": "2025-09-30T19:15:37.253",
+    "keyword": "password spray",
+    "attack_type_hint": "BruteForce"
+  },
+  {
+    "cve_id": "CVE-2025-66307",
+    "description": "This admin plugin for Grav is an HTML user interface that provides a convenient way to configure Grav and easily create and modify pages. Prior to 1.11.0-beta.1, a user enumeration and email disclosure vulnerability exists in Grav. The \"Forgot Password\" functionality at /admin/forgot leaks information about valid usernames and their associated email addresses through distinct server responses. This allows an attacker to enumerate users and disclose sensitive email addresses, which can be leveraged for targeted attacks such as password spraying, phishing, or social engineering. This vulnerability is fixed in 1.11.0-beta.1.",
+    "base_score": 6.5,
+    "published": "2025-12-01T22:15:50.570",
+    "keyword": "password spray",
+    "attack_type_hint": "BruteForce"
   }
 ]

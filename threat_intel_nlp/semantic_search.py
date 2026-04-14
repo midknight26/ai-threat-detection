@@ -3,7 +3,7 @@ import numpy as np
 import os
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from cve_fetcher import fetch_all_cves
+from threat_intel_nlp.cve_fetcher import fetch_all_cves
 
 MODEL_NAME = "all-MiniLM-L6-v2"
 EMBEDDING_CACHE = "data/cve_embeddings.npy"
