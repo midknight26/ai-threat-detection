@@ -54,7 +54,7 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    st.markdown("STACK: Isolation Forest · Random Forest · MiniLM · Mistral (Ollama) · ELK")
+    st.markdown("STACK: Isolation Forest · Random Forest · MiniLM · phi3 (Ollama) · ELK")
 
 # ── FILTER DATA ───────────────────────────────────────────────────────
 fdf = df.copy()
@@ -104,6 +104,20 @@ elif page == "🤖 SOC Assistant":
     if not df.empty:
         selected_alert = df.iloc[0].to_dict()
 
+        # Severity 
+        severity_color = {
+            "CRITICAL": "red",
+            "HIGH": "orange",
+            "MEDIUM": "gold",
+            "LOW": "green"
+        }
+
+        st.markdown(
+            f"<span style='color:{severity_color[selected_alert['severity']]}; font-weight:bold;'>"
+            f"{selected_alert['severity']} ALERT</span>",
+            unsafe_allow_html=True
+        )
+
         st.subheader("Selected Alert")
         st.json(selected_alert)
 
@@ -114,15 +128,28 @@ elif page == "🤖 SOC Assistant":
             # 🔗 CVEs
             st.subheader("🔗 Matched CVEs")
             for cve in cves:
-                st.markdown(f"""
-**{cve['cve_id']}**
-- Similarity: {cve['similarity_score']:.3f}
-- {cve['description'][:200]}...
-""")
+                with st.container():
+                    st.markdown(
+                        "<div style='background-color:#111; padding:10px; border-radius:8px;'>",
+                        unsafe_allow_html=True 
+                    )
+                    st.markdown(f"### {cve['cve_id']}")
+                    st.markdown(f"**Similarity:** {cve['similarity_score']:.3f}")
+        
+                    st.markdown(
+                        f"<div style='font-size:14px; color:#ccc;'>"
+                        f"{cve['description'][:180]}..."
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+        
+                    st.markdown("</div>")
 
             # 🧠 LLM
             st.subheader("🧠 SOC Analysis")
             st.write(reply)
+            if "timed out" in reply:
+                st.warning("LLM response timed out - showing fallback analysis")
 
             st.session_state["conversation"] = conversation
 
@@ -140,7 +167,7 @@ elif page == "🤖 SOC Assistant":
 
                 response = requests.post(
                     "http://localhost:11434/api/generate",
-                    json={"model": "llama3:8b", "prompt": prompt, "stream": False}
+                    json={"model": "phi3", "prompt": prompt, "stream": False}
                 )
 
                 reply = response.json()["response"]

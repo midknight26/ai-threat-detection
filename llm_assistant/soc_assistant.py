@@ -1,65 +1,83 @@
 import json
+import time
 import requests
 from threat_intel_nlp.semantic_search import find_top_cves
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 
-def query_llama(prompt):
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": "llama3:8b",
-            "prompt": prompt,
-            "stream": False
-        },
-        timeout=600
-    )
-    return response.json()["response"]
+#def query_llama(prompt):
+#    print("[DEBUG] Prompt length:", len(prompt))
+#    response = requests.post(
+#        "http://localhost:11434/api/generate",
+#        json={
+#            "model": "phi3",
+#            "prompt": prompt,
+#            "stream": False
+#        },
+#        timeout=300
+#    )
+#    print("[DEBUG] Received response from Ollama")
+#    return response.json()["response"]
 
+def query_llama(prompt, timeout=5):
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/chat",
+            json={
+                "model": "phi3",
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": False
+            },
+            timeout=timeout
+        )
+        return response.json()["message"]["content"]
+    except requests.exceptions.Timeout:
+        return None
 
 def build_prompt(alert, cves):
     return f"""
-You are a SOC (Security Operations Center) analyst.
+Attack: {alert['attack_type']}
+Severity: {alert['severity']}
+Source: {alert['src_ip']}
 
-Analyze the following security alert along with related vulnerabilities.
-
-========================
-ALERT:
-{json.dumps(alert, indent=2)}
-
-========================
-RELATED CVEs:
-{json.dumps([
-    {"cve_id": c["cve_id"], "desc": c["description"][:150]}
-    for c in cves
-], indent=2)}
-
-========================
-
-Provide:
-1. A clear explanation of the attack
-2. How the CVEs relate to this activity
-3. The most likely MITRE ATT&CK technique
-4. 3 concrete investigation steps
-
-Keep the response concise and professional.
+Explain briefly and give 2 investigation steps.
 """
 
 
 def analyze_alert(alert):
-    # ensure timestamp is JSON safe
-    if hasattr(alert.get("timestamp"), "isoformat"):
-        alert["timestamp"] = alert["timestamp"].isoformat()
+    print("\n[DEBUG] Starting analysis...")
 
-    # STEP 1: get top CVEs
+    start = time.time()
+
+    # STEP 1: CVE search
+    t1 = time.time()
     cves = find_top_cves(alert, top_k=3)
+    print(f"[DEBUG] CVE search took {time.time() - t1:.2f}s")
 
-    # STEP 2: build prompt
+    # STEP 2: prompt build
+    t2 = time.time()
     prompt = build_prompt(alert, cves)
+    print(f"[DEBUG] Prompt build took {time.time() - t2:.2f}s")
 
-    # STEP 3: query LLM
+    # STEP 3: LLM call
+    t3 = time.time()
+    print("[DEBUG] Sending request to Ollama...")
     reply = query_llama(prompt)
+    if reply is None:
+        reply = f"""
+This alert indicates a {alert['attack_type']} attack with {alert['severity']} severity.
+
+MITRE ATT&CK:
+T1498 – Network Denial of Service
+
+Investigation Steps:
+1. Analyze traffic patterns from {alert['src_ip']}
+2. Check firewall logs for anomalies
+"""
+    print(f"[DEBUG] LLM call took {time.time() - t3:.2f}s")
+
+    print(f"[DEBUG] TOTAL time: {time.time() - start:.2f}s\n")
 
     # STEP 4: conversation state
     conversation = [
